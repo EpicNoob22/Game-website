@@ -2,6 +2,10 @@
 
 A high-performance gaming website with 12 playable browser games!
 
+## 🌐 Play Now
+
+**[Play the games live on GitHub Pages!](https://EpicNoob22.github.io/Game-website/)**
+
 ## Features
 
 - **12 Different Games**: Snake, Pong, Breakout, Flappy Bird, Space Invaders, Asteroids, Tetris, Memory Match, 2048, Endless Runner, Target Shooter, and Platformer
@@ -34,6 +38,13 @@ A high-performance gaming website with 12 playable browser games!
 
 ## How to Play
 
+### Online (GitHub Pages)
+1. Visit [https://EpicNoob22.github.io/Game-website/](https://EpicNoob22.github.io/Game-website/)
+2. Click on any game card to start playing
+3. Use keyboard controls as shown in each game
+4. Press ESC to close the game modal
+
+### Local
 1. Open `index.html` in your browser
 2. Click on any game card to start playing
 3. Use keyboard controls as shown in each game
