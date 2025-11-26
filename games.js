@@ -470,6 +470,7 @@ function startFlappy(ctx, canvas) {
                 }
             }
             
+            if (!pipe.passed && pipe.x + pipeWidth < 100) {
                 pipe.passed = true;
                 score++;
                 updateScore();
@@ -859,6 +860,7 @@ function startTetris(ctx, canvas) {
                 merge();
                 clearLines();
                 newPiece();
+                if (!canMove(0, 0)) {
                     board = Array(rows).fill().map(() => Array(cols).fill(0));
                     score = 0;
                     updateScore();
@@ -1071,6 +1073,7 @@ function startRunner(ctx, canvas) {
     
     function handleInput(e) {
         if (currentGame !== 'runner') return;
+        if ((e.key === ' ' || e.key === 'ArrowUp' || e.type === 'click') && !isJumping) {
             playerVelocity = jumpStrength;
             isJumping = true;
         }
@@ -1112,6 +1115,7 @@ function startRunner(ctx, canvas) {
                 updateScore();
             }
             
+            if (o.x + o.width < 100 && !o.passed) {
                 o.passed = true;
                 score += 10;
                 updateScore();
@@ -1292,6 +1296,7 @@ function startPlatformer(ctx, canvas) {
         }
         
         coins.forEach(c => {
+            if (!c.collected) {
                 const dx = (player.x + player.width/2) - c.x;
                 const dy = (player.y + player.height/2) - c.y;
                 if (Math.sqrt(dx*dx + dy*dy) < 30) {
@@ -1312,6 +1317,7 @@ function startPlatformer(ctx, canvas) {
         
         ctx.fillStyle = '#ffcc00';
         coins.forEach(c => {
+            if (!c.collected) {
                 ctx.beginPath();
                 ctx.arc(c.x, c.y, 15, 0, Math.PI * 2);
                 ctx.fill();
