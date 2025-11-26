@@ -33,7 +33,13 @@ function openGame(gameName) {
         '2048': { title: '2048', instructions: 'Arrow keys to slide tiles' },
         runner: { title: 'Endless Runner', instructions: 'Space or Up arrow to jump' },
         shooter: { title: 'Target Shooter', instructions: 'Click targets to shoot!' },
-        platformer: { title: 'Platformer', instructions: 'Arrow keys to move, Space to jump' }
+        platformer: { title: 'Platformer', instructions: 'Arrow keys to move, Space to jump' },
+        minesweeper: { title: 'Minesweeper', instructions: 'Left click to reveal, right click to flag mines' },
+        tictactoe: { title: 'Tic-Tac-Toe', instructions: 'Click to place X, try to beat the AI!' },
+        connectfour: { title: 'Connect Four', instructions: 'Click column to drop piece, connect 4 to win!' },
+        whackamole: { title: 'Whack-a-Mole', instructions: 'Click the moles before they hide!' },
+        dinorunner: { title: 'Dino Runner', instructions: 'Space to jump, Down to duck' },
+        simonsays: { title: 'Simon Says', instructions: 'Watch the pattern and repeat it!' }
     };
     
     const info = gameInfo[gameName] || { title: 'Game', instructions: 'Have fun!' };
@@ -80,6 +86,12 @@ function startGame(gameName, canvas, container) {
         case 'runner': startRunner(ctx, canvas); break;
         case 'shooter': startShooter(ctx, canvas); break;
         case 'platformer': startPlatformer(ctx, canvas); break;
+        case 'minesweeper': startMinesweeper(canvas, container); break;
+        case 'tictactoe': startTicTacToe(canvas, container); break;
+        case 'connectfour': startConnectFour(canvas, container); break;
+        case 'whackamole': startWhackAMole(ctx, canvas); break;
+        case 'dinorunner': startDinoRunner(ctx, canvas); break;
+        case 'simonsays': startSimonSays(canvas, container); break;
     }
 }
 
@@ -1336,6 +1348,922 @@ function startPlatformer(ctx, canvas) {
 }
 
 
+// ==================== MINESWEEPER ====================
+function startMinesweeper(canvas, container) {
+    canvas.style.display = 'none';
+    
+    const rows = 10;
+    const cols = 10;
+    const mineCount = 15;
+    let grid = [];
+    let revealed = [];
+    let flagged = [];
+    let gameOver = false;
+    
+    function initGame() {
+        grid = [];
+        revealed = [];
+        flagged = [];
+        gameOver = false;
+        score = 0;
+        updateScore();
+        
+        for (let r = 0; r < rows; r++) {
+            grid[r] = [];
+            revealed[r] = [];
+            flagged[r] = [];
+            for (let c = 0; c < cols; c++) {
+                grid[r][c] = 0;
+                revealed[r][c] = false;
+                flagged[r][c] = false;
+            }
+        }
+        
+        let minesPlaced = 0;
+        while (minesPlaced < mineCount) {
+            const r = Math.floor(Math.random() * rows);
+            const c = Math.floor(Math.random() * cols);
+            if (grid[r][c] !== -1) {
+                grid[r][c] = -1;
+                minesPlaced++;
+            }
+        }
+        
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                if (grid[r][c] !== -1) {
+                    let count = 0;
+                    for (let dr = -1; dr <= 1; dr++) {
+                        for (let dc = -1; dc <= 1; dc++) {
+                            const nr = r + dr, nc = c + dc;
+                            if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && grid[nr][nc] === -1) {
+                                count++;
+                            }
+                        }
+                    }
+                    grid[r][c] = count;
+                }
+            }
+        }
+        render();
+    }
+    
+    function reveal(r, c) {
+        if (r < 0 || r >= rows || c < 0 || c >= cols || revealed[r][c] || flagged[r][c] || gameOver) return;
+        
+        revealed[r][c] = true;
+        
+        if (grid[r][c] === -1) {
+            gameOver = true;
+            for (let i = 0; i < rows; i++) {
+                for (let j = 0; j < cols; j++) {
+                    revealed[i][j] = true;
+                }
+            }
+        } else if (grid[r][c] === 0) {
+            for (let dr = -1; dr <= 1; dr++) {
+                for (let dc = -1; dc <= 1; dc++) {
+                    reveal(r + dr, c + dc);
+                }
+            }
+        }
+        
+        let safe = 0;
+        for (let i = 0; i < rows; i++) {
+            for (let j = 0; j < cols; j++) {
+                if (revealed[i][j] && grid[i][j] !== -1) safe++;
+            }
+        }
+        score = safe * 10;
+        updateScore();
+        
+        render();
+    }
+    
+    function toggleFlag(r, c) {
+        if (revealed[r][c] || gameOver) return;
+        flagged[r][c] = !flagged[r][c];
+        render();
+    }
+    
+    const gameDiv = document.createElement('div');
+    gameDiv.style.cssText = 'display:grid;grid-template-columns:repeat(' + cols + ',40px);gap:2px;padding:10px;background:#333;border-radius:10px;';
+    
+    function render() {
+        gameDiv.innerHTML = '';
+        const colors = ['#888', '#0000ff', '#008000', '#ff0000', '#000080', '#800000', '#008080', '#000', '#808080'];
+        
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                const cell = document.createElement('div');
+                cell.style.cssText = 'width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:1.2rem;cursor:pointer;border-radius:5px;user-select:none;';
+                
+                if (revealed[r][c]) {
+                    cell.style.background = '#ddd';
+                    if (grid[r][c] === -1) {
+                        cell.textContent = '💣';
+                        cell.style.background = '#ff0055';
+                    } else if (grid[r][c] > 0) {
+                        cell.textContent = grid[r][c];
+                        cell.style.color = colors[grid[r][c]];
+                    }
+                } else {
+                    cell.style.background = '#00ff88';
+                    if (flagged[r][c]) {
+                        cell.textContent = '🚩';
+                    }
+                }
+                
+                const row = r, col = c;
+                cell.addEventListener('click', () => reveal(row, col));
+                cell.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    toggleFlag(row, col);
+                });
+                
+                gameDiv.appendChild(cell);
+            }
+        }
+        
+        if (gameOver) {
+            const restartBtn = document.createElement('button');
+            restartBtn.textContent = 'Play Again';
+            restartBtn.style.cssText = 'grid-column:1/-1;padding:10px;margin-top:10px;background:#00ff88;border:none;border-radius:5px;font-weight:bold;cursor:pointer;';
+            restartBtn.onclick = initGame;
+            gameDiv.appendChild(restartBtn);
+        }
+    }
+    
+    initGame();
+    container.appendChild(gameDiv);
+}
+
+
+// ==================== TIC-TAC-TOE ====================
+function startTicTacToe(canvas, container) {
+    canvas.style.display = 'none';
+    
+    let board = ['', '', '', '', '', '', '', '', ''];
+    let currentPlayer = 'X';
+    let gameOver = false;
+    
+    function checkWinner() {
+        const lines = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8],
+            [0, 3, 6], [1, 4, 7], [2, 5, 8],
+            [0, 4, 8], [2, 4, 6]
+        ];
+        
+        for (const [a, b, c] of lines) {
+            if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+                return board[a];
+            }
+        }
+        return board.includes('') ? null : 'tie';
+    }
+    
+    function aiMove() {
+        const empty = board.map((v, i) => v === '' ? i : -1).filter(i => i !== -1);
+        if (empty.length === 0) return;
+        
+        for (const i of empty) {
+            board[i] = 'O';
+            if (checkWinner() === 'O') return;
+            board[i] = '';
+        }
+        
+        for (const i of empty) {
+            board[i] = 'X';
+            if (checkWinner() === 'X') {
+                board[i] = 'O';
+                return;
+            }
+            board[i] = '';
+        }
+        
+        if (board[4] === '') {
+            board[4] = 'O';
+            return;
+        }
+        
+        const corners = [0, 2, 6, 8].filter(i => board[i] === '');
+        if (corners.length > 0) {
+            board[corners[Math.floor(Math.random() * corners.length)]] = 'O';
+            return;
+        }
+        
+        board[empty[Math.floor(Math.random() * empty.length)]] = 'O';
+    }
+    
+    function handleClick(index) {
+        if (board[index] !== '' || gameOver || currentPlayer !== 'X') return;
+        
+        board[index] = 'X';
+        const winner = checkWinner();
+        
+        if (winner) {
+            gameOver = true;
+            if (winner === 'X') score += 100;
+            updateScore();
+        } else {
+            currentPlayer = 'O';
+            setTimeout(() => {
+                aiMove();
+                const winner = checkWinner();
+                if (winner) {
+                    gameOver = true;
+                    if (winner === 'X') score += 100;
+                    updateScore();
+                }
+                currentPlayer = 'X';
+                render();
+            }, 500);
+        }
+        render();
+    }
+    
+    function resetGame() {
+        board = ['', '', '', '', '', '', '', '', ''];
+        currentPlayer = 'X';
+        gameOver = false;
+        render();
+    }
+    
+    const gameDiv = document.createElement('div');
+    gameDiv.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:20px;';
+    
+    const gridDiv = document.createElement('div');
+    gridDiv.style.cssText = 'display:grid;grid-template-columns:repeat(3,100px);gap:5px;';
+    
+    function render() {
+        gridDiv.innerHTML = '';
+        
+        for (let i = 0; i < 9; i++) {
+            const cell = document.createElement('div');
+            cell.style.cssText = 'width:100px;height:100px;background:#1a1a2e;border:2px solid #00ff88;display:flex;align-items:center;justify-content:center;font-size:3rem;cursor:pointer;border-radius:10px;font-family:Orbitron,sans-serif;';
+            cell.style.color = board[i] === 'X' ? '#00ff88' : '#ff00ff';
+            cell.textContent = board[i];
+            
+            const index = i;
+            cell.addEventListener('click', () => handleClick(index));
+            gridDiv.appendChild(cell);
+        }
+    }
+    
+    const resetBtn = document.createElement('button');
+    resetBtn.textContent = 'New Game';
+    resetBtn.style.cssText = 'padding:15px 30px;background:linear-gradient(135deg,#00ff88,#00d4ff);border:none;border-radius:10px;font-family:Orbitron,sans-serif;font-weight:bold;cursor:pointer;';
+    resetBtn.onclick = resetGame;
+    
+    gameDiv.appendChild(gridDiv);
+    gameDiv.appendChild(resetBtn);
+    container.appendChild(gameDiv);
+    render();
+}
+
+
+// ==================== CONNECT FOUR ====================
+function startConnectFour(canvas, container) {
+    canvas.style.display = 'none';
+    
+    const rows = 6;
+    const cols = 7;
+    let board = [];
+    let currentPlayer = 1;
+    let gameOver = false;
+    
+    function initGame() {
+        board = [];
+        for (let r = 0; r < rows; r++) {
+            board[r] = Array(cols).fill(0);
+        }
+        currentPlayer = 1;
+        gameOver = false;
+        render();
+    }
+    
+    function dropPiece(col) {
+        if (gameOver) return;
+        
+        for (let r = rows - 1; r >= 0; r--) {
+            if (board[r][col] === 0) {
+                board[r][col] = currentPlayer;
+                
+                if (checkWin(r, col)) {
+                    gameOver = true;
+                    if (currentPlayer === 1) {
+                        score += 100;
+                        updateScore();
+                    }
+                } else {
+                    currentPlayer = currentPlayer === 1 ? 2 : 1;
+                    if (currentPlayer === 2 && !gameOver) {
+                        setTimeout(aiMove, 500);
+                    }
+                }
+                render();
+                return;
+            }
+        }
+    }
+    
+    function checkWin(row, col) {
+        const player = board[row][col];
+        const directions = [[0, 1], [1, 0], [1, 1], [1, -1]];
+        
+        for (const [dr, dc] of directions) {
+            let count = 1;
+            for (let i = 1; i < 4; i++) {
+                const nr = row + dr * i, nc = col + dc * i;
+                if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && board[nr][nc] === player) count++;
+                else break;
+            }
+            for (let i = 1; i < 4; i++) {
+                const nr = row - dr * i, nc = col - dc * i;
+                if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && board[nr][nc] === player) count++;
+                else break;
+            }
+            if (count >= 4) return true;
+        }
+        return false;
+    }
+    
+    function aiMove() {
+        if (gameOver || currentPlayer !== 2) return;
+        
+        const validCols = [];
+        for (let c = 0; c < cols; c++) {
+            if (board[0][c] === 0) validCols.push(c);
+        }
+        
+        if (validCols.length === 0) return;
+        
+        let chosenCol = -1;
+        
+        // Check if AI can win
+        for (const col of validCols) {
+            for (let r = rows - 1; r >= 0; r--) {
+                if (board[r][col] === 0) {
+                    board[r][col] = 2;
+                    if (checkWin(r, col)) {
+                        chosenCol = col;
+                    }
+                    board[r][col] = 0;
+                    break;
+                }
+            }
+            if (chosenCol !== -1) break;
+        }
+        
+        // Block player's winning move
+        if (chosenCol === -1) {
+            for (const col of validCols) {
+                for (let r = rows - 1; r >= 0; r--) {
+                    if (board[r][col] === 0) {
+                        board[r][col] = 1;
+                        if (checkWin(r, col)) {
+                            chosenCol = col;
+                        }
+                        board[r][col] = 0;
+                        break;
+                    }
+                }
+                if (chosenCol !== -1) break;
+            }
+        }
+        
+        // Default move: center or random
+        if (chosenCol === -1) {
+            if (validCols.includes(3)) {
+                chosenCol = 3;
+            } else {
+                chosenCol = validCols[Math.floor(Math.random() * validCols.length)];
+            }
+        }
+        
+        // Place the AI piece directly
+        for (let r = rows - 1; r >= 0; r--) {
+            if (board[r][chosenCol] === 0) {
+                board[r][chosenCol] = 2;
+                
+                if (checkWin(r, chosenCol)) {
+                    gameOver = true;
+                }
+                
+                currentPlayer = 1;
+                render();
+                return;
+            }
+        }
+    }
+    
+    const gameDiv = document.createElement('div');
+    gameDiv.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:20px;';
+    
+    const gridDiv = document.createElement('div');
+    gridDiv.style.cssText = 'display:grid;grid-template-columns:repeat(' + cols + ',60px);gap:5px;padding:15px;background:#0066ff;border-radius:15px;';
+    
+    function render() {
+        gridDiv.innerHTML = '';
+        
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                const cell = document.createElement('div');
+                cell.style.cssText = 'width:60px;height:60px;border-radius:50%;cursor:pointer;transition:all 0.2s;';
+                
+                if (board[r][c] === 0) {
+                    cell.style.background = '#1a1a2e';
+                } else if (board[r][c] === 1) {
+                    cell.style.background = '#ff0055';
+                } else {
+                    cell.style.background = '#ffcc00';
+                }
+                
+                const col = c;
+                cell.addEventListener('click', () => {
+                    if (currentPlayer === 1) dropPiece(col);
+                });
+                gridDiv.appendChild(cell);
+            }
+        }
+        
+        if (gameOver) {
+            const status = document.createElement('div');
+            status.style.cssText = 'grid-column:1/-1;text-align:center;color:white;font-family:Orbitron,sans-serif;font-size:1.2rem;padding:10px;';
+            status.textContent = currentPlayer === 1 ? 'You Win!' : 'AI Wins!';
+            gridDiv.appendChild(status);
+        }
+    }
+    
+    const resetBtn = document.createElement('button');
+    resetBtn.textContent = 'New Game';
+    resetBtn.style.cssText = 'padding:15px 30px;background:linear-gradient(135deg,#00ff88,#00d4ff);border:none;border-radius:10px;font-family:Orbitron,sans-serif;font-weight:bold;cursor:pointer;';
+    resetBtn.onclick = initGame;
+    
+    gameDiv.appendChild(gridDiv);
+    gameDiv.appendChild(resetBtn);
+    container.appendChild(gameDiv);
+    initGame();
+}
+
+
+// ==================== WHACK-A-MOLE ====================
+function startWhackAMole(ctx, canvas) {
+    const holes = [];
+    const holeCount = 9;
+    const cols = 3;
+    const holeSize = 80;
+    const padding = 50;
+    const startX = (canvas.width - (cols * (holeSize + padding))) / 2 + padding;
+    const startY = 100;
+    
+    for (let i = 0; i < holeCount; i++) {
+        const row = Math.floor(i / cols);
+        const col = i % cols;
+        holes.push({
+            x: startX + col * (holeSize + padding),
+            y: startY + row * (holeSize + padding),
+            active: false,
+            timer: 0
+        });
+    }
+    
+    let spawnTimer = 0;
+    let gameTime = 30;
+    let lastSecond = Date.now();
+    
+    function handleClick(e) {
+        if (currentGame !== 'whackamole') return;
+        
+        const rect = canvas.getBoundingClientRect();
+        const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+        const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+        
+        holes.forEach(hole => {
+            if (hole.active) {
+                const dx = x - (hole.x + holeSize / 2);
+                const dy = y - (hole.y + holeSize / 2);
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                
+                if (dist < holeSize / 2) {
+                    hole.active = false;
+                    score += 10;
+                    updateScore();
+                }
+            }
+        });
+    }
+    
+    canvas.addEventListener('click', handleClick);
+    
+    function update() {
+        if (currentGame !== 'whackamole') return;
+        
+        const now = Date.now();
+        if (now - lastSecond >= 1000) {
+            gameTime--;
+            lastSecond = now;
+            if (gameTime <= 0) {
+                ctx.fillStyle = '#1a1a2e';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#00ff88';
+                ctx.font = '48px Orbitron';
+                ctx.textAlign = 'center';
+                ctx.fillText('Game Over!', canvas.width / 2, canvas.height / 2);
+                ctx.fillText('Score: ' + score, canvas.width / 2, canvas.height / 2 + 60);
+                return;
+            }
+        }
+        
+        spawnTimer++;
+        if (spawnTimer > 30) {
+            const inactiveHoles = holes.filter(h => !h.active);
+            if (inactiveHoles.length > 0) {
+                const hole = inactiveHoles[Math.floor(Math.random() * inactiveHoles.length)];
+                hole.active = true;
+                hole.timer = 60;
+            }
+            spawnTimer = 0;
+        }
+        
+        holes.forEach(hole => {
+            if (hole.active) {
+                hole.timer--;
+                if (hole.timer <= 0) {
+                    hole.active = false;
+                }
+            }
+        });
+        
+        ctx.fillStyle = '#1a1a2e';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.fillStyle = '#00ff88';
+        ctx.font = '24px Orbitron';
+        ctx.textAlign = 'center';
+        ctx.fillText('Time: ' + gameTime + 's', canvas.width / 2, 50);
+        
+        holes.forEach(hole => {
+            ctx.fillStyle = '#4a3c2a';
+            ctx.beginPath();
+            ctx.ellipse(hole.x + holeSize / 2, hole.y + holeSize, holeSize / 2 + 10, 20, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            if (hole.active) {
+                ctx.fillStyle = '#8B4513';
+                ctx.beginPath();
+                ctx.arc(hole.x + holeSize / 2, hole.y + holeSize / 2, holeSize / 2, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.fillStyle = '#D2691E';
+                ctx.beginPath();
+                ctx.arc(hole.x + holeSize / 2, hole.y + holeSize / 2 - 10, holeSize / 3, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.fillStyle = '#000';
+                ctx.beginPath();
+                ctx.arc(hole.x + holeSize / 2 - 10, hole.y + holeSize / 2 - 15, 5, 0, Math.PI * 2);
+                ctx.arc(hole.x + holeSize / 2 + 10, hole.y + holeSize / 2 - 15, 5, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.fillStyle = '#FF69B4';
+                ctx.beginPath();
+                ctx.arc(hole.x + holeSize / 2, hole.y + holeSize / 2, 8, 0, Math.PI * 2);
+                ctx.fill();
+            } else {
+                ctx.fillStyle = '#2a2a2a';
+                ctx.beginPath();
+                ctx.ellipse(hole.x + holeSize / 2, hole.y + holeSize / 2 + 10, holeSize / 2 - 5, holeSize / 4, 0, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        });
+        
+        gameLoop = requestAnimationFrame(update);
+    }
+    
+    gameLoop = requestAnimationFrame(update);
+}
+
+
+// ==================== DINO RUNNER ====================
+function startDinoRunner(ctx, canvas) {
+    const ground = canvas.height - 80;
+    let dino = {
+        x: 80,
+        y: ground - 60,
+        width: 50,
+        height: 60,
+        vy: 0,
+        ducking: false
+    };
+    
+    let obstacles = [];
+    let clouds = [];
+    let birds = [];
+    let gameSpeed = 6;
+    let obstacleTimer = 0;
+    let cloudTimer = 0;
+    let distance = 0;
+    let gameOver = false;
+    
+    const gravity = 0.8;
+    const jumpStrength = -16;
+    
+    for (let i = 0; i < 3; i++) {
+        clouds.push({
+            x: Math.random() * canvas.width,
+            y: 50 + Math.random() * 100
+        });
+    }
+    
+    function handleKeyDown(e) {
+        if (currentGame !== 'dinorunner') return;
+        if (gameOver && (e.key === ' ' || e.key === 'ArrowUp')) {
+            resetGame();
+            return;
+        }
+        if ((e.key === ' ' || e.key === 'ArrowUp') && dino.y >= ground - dino.height) {
+            dino.vy = jumpStrength;
+        }
+        if (e.key === 'ArrowDown') {
+            dino.ducking = true;
+            dino.height = 30;
+            dino.y = ground - 30;
+        }
+    }
+    
+    function handleKeyUp(e) {
+        if (e.key === 'ArrowDown') {
+            dino.ducking = false;
+            dino.height = 60;
+            if (dino.y === ground - 30) {
+                dino.y = ground - 60;
+            }
+        }
+    }
+    
+    function resetGame() {
+        dino.y = ground - 60;
+        dino.vy = 0;
+        dino.ducking = false;
+        dino.height = 60;
+        obstacles = [];
+        birds = [];
+        gameSpeed = 6;
+        distance = 0;
+        score = 0;
+        gameOver = false;
+        updateScore();
+    }
+    
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keyup', handleKeyUp);
+    
+    function update() {
+        if (currentGame !== 'dinorunner') return;
+        
+        if (!gameOver) {
+            dino.vy += gravity;
+            dino.y += dino.vy;
+            
+            if (dino.y > ground - dino.height) {
+                dino.y = ground - dino.height;
+                dino.vy = 0;
+            }
+            
+            distance++;
+            if (distance % 10 === 0) {
+                score++;
+                updateScore();
+            }
+            
+            if (distance % 500 === 0) {
+                gameSpeed += 0.5;
+            }
+            
+            obstacleTimer++;
+            if (obstacleTimer > 80 + Math.random() * 60) {
+                if (Math.random() > 0.3) {
+                    obstacles.push({
+                        x: canvas.width,
+                        y: ground - 40,
+                        width: 20 + Math.random() * 20,
+                        height: 30 + Math.random() * 30
+                    });
+                } else {
+                    birds.push({
+                        x: canvas.width,
+                        y: ground - 80 - Math.random() * 60,
+                        width: 40,
+                        height: 30
+                    });
+                }
+                obstacleTimer = 0;
+            }
+            
+            cloudTimer++;
+            if (cloudTimer > 100) {
+                clouds.push({
+                    x: canvas.width,
+                    y: 50 + Math.random() * 100
+                });
+                cloudTimer = 0;
+            }
+            
+            obstacles.forEach(o => o.x -= gameSpeed);
+            birds.forEach(b => b.x -= gameSpeed * 1.2);
+            clouds.forEach(c => c.x -= 1);
+            
+            obstacles = obstacles.filter(o => o.x > -50);
+            birds = birds.filter(b => b.x > -50);
+            clouds = clouds.filter(c => c.x > -50);
+            
+            [...obstacles, ...birds].forEach(o => {
+                if (dino.x < o.x + o.width &&
+                    dino.x + dino.width > o.x &&
+                    dino.y < o.y + o.height &&
+                    dino.y + dino.height > o.y) {
+                    gameOver = true;
+                }
+            });
+        }
+        
+        ctx.fillStyle = '#f7f7f7';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.fillStyle = '#ddd';
+        clouds.forEach(c => {
+            ctx.beginPath();
+            ctx.arc(c.x, c.y, 25, 0, Math.PI * 2);
+            ctx.arc(c.x + 25, c.y - 10, 20, 0, Math.PI * 2);
+            ctx.arc(c.x + 50, c.y, 25, 0, Math.PI * 2);
+            ctx.fill();
+        });
+        
+        ctx.fillStyle = '#535353';
+        ctx.fillRect(0, ground, canvas.width, 2);
+        
+        for (let i = 0; i < canvas.width; i += 20) {
+            if (Math.random() > 0.7) {
+                ctx.fillRect(i + (distance % 20), ground + 5, 2, 2);
+            }
+        }
+        
+        ctx.fillStyle = '#535353';
+        if (dino.ducking) {
+            ctx.fillRect(dino.x, dino.y, dino.width + 10, dino.height);
+        } else {
+            ctx.fillRect(dino.x, dino.y, dino.width - 10, dino.height);
+            ctx.fillRect(dino.x + 30, dino.y, 20, 25);
+            
+            ctx.fillStyle = '#f7f7f7';
+            ctx.fillRect(dino.x + 40, dino.y + 5, 5, 5);
+        }
+        
+        ctx.fillStyle = '#535353';
+        obstacles.forEach(o => {
+            ctx.fillRect(o.x, o.y, o.width, o.height);
+            ctx.fillRect(o.x + o.width / 4, o.y - 10, o.width / 2, 10);
+        });
+        
+        birds.forEach(b => {
+            ctx.beginPath();
+            ctx.moveTo(b.x, b.y + b.height / 2);
+            ctx.lineTo(b.x + b.width / 2, b.y);
+            ctx.lineTo(b.x + b.width, b.y + b.height / 2);
+            ctx.lineTo(b.x + b.width / 2, b.y + b.height);
+            ctx.closePath();
+            ctx.fill();
+        });
+        
+        if (gameOver) {
+            ctx.fillStyle = 'rgba(0,0,0,0.5)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#fff';
+            ctx.font = '48px Orbitron';
+            ctx.textAlign = 'center';
+            ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2);
+            ctx.font = '24px Orbitron';
+            ctx.fillText('Press SPACE to restart', canvas.width / 2, canvas.height / 2 + 50);
+        }
+        
+        gameLoop = requestAnimationFrame(update);
+    }
+    
+    gameLoop = requestAnimationFrame(update);
+}
+
+
+// ==================== SIMON SAYS ====================
+function startSimonSays(canvas, container) {
+    canvas.style.display = 'none';
+    
+    const colors = ['#ff0055', '#00ff88', '#0066ff', '#ffcc00'];
+    let sequence = [];
+    let playerIndex = 0;
+    let isPlaying = false;
+    let canClick = false;
+    let level = 0;
+    
+    const gameDiv = document.createElement('div');
+    gameDiv.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:30px;';
+    
+    const statusDiv = document.createElement('div');
+    statusDiv.style.cssText = 'font-family:Orbitron,sans-serif;font-size:1.5rem;color:#00ff88;';
+    statusDiv.textContent = 'Press Start!';
+    
+    const gridDiv = document.createElement('div');
+    gridDiv.style.cssText = 'display:grid;grid-template-columns:repeat(2,120px);gap:15px;';
+    
+    const buttons = [];
+    
+    for (let i = 0; i < 4; i++) {
+        const btn = document.createElement('div');
+        btn.style.cssText = 'width:120px;height:120px;border-radius:15px;cursor:pointer;transition:all 0.2s;opacity:0.6;';
+        btn.style.background = colors[i];
+        
+        btn.addEventListener('click', () => {
+            if (!canClick) return;
+            
+            flashButton(i);
+            
+            if (sequence[playerIndex] === i) {
+                playerIndex++;
+                if (playerIndex === sequence.length) {
+                    canClick = false;
+                    score += level * 10;
+                    updateScore();
+                    statusDiv.textContent = 'Correct! Level ' + (level + 1);
+                    setTimeout(nextRound, 1000);
+                }
+            } else {
+                canClick = false;
+                statusDiv.textContent = 'Wrong! Game Over';
+                setTimeout(() => {
+                    statusDiv.textContent = 'Press Start!';
+                }, 2000);
+            }
+        });
+        
+        buttons.push(btn);
+        gridDiv.appendChild(btn);
+    }
+    
+    function flashButton(index, duration = 300) {
+        buttons[index].style.opacity = '1';
+        buttons[index].style.transform = 'scale(1.1)';
+        setTimeout(() => {
+            buttons[index].style.opacity = '0.6';
+            buttons[index].style.transform = 'scale(1)';
+        }, duration);
+    }
+    
+    function playSequence() {
+        isPlaying = true;
+        canClick = false;
+        let i = 0;
+        
+        const interval = setInterval(() => {
+            if (i >= sequence.length) {
+                clearInterval(interval);
+                isPlaying = false;
+                canClick = true;
+                statusDiv.textContent = 'Your turn!';
+                return;
+            }
+            flashButton(sequence[i], 500);
+            i++;
+        }, 800);
+    }
+    
+    function nextRound() {
+        level++;
+        sequence.push(Math.floor(Math.random() * 4));
+        playerIndex = 0;
+        statusDiv.textContent = 'Watch...';
+        setTimeout(playSequence, 500);
+    }
+    
+    function startNewGame() {
+        sequence = [];
+        level = 0;
+        score = 0;
+        updateScore();
+        nextRound();
+    }
+    
+    const startBtn = document.createElement('button');
+    startBtn.textContent = 'Start Game';
+    startBtn.style.cssText = 'padding:15px 30px;background:linear-gradient(135deg,#00ff88,#00d4ff);border:none;border-radius:10px;font-family:Orbitron,sans-serif;font-weight:bold;cursor:pointer;font-size:1rem;';
+    startBtn.onclick = startNewGame;
+    
+    gameDiv.appendChild(statusDiv);
+    gameDiv.appendChild(gridDiv);
+    gameDiv.appendChild(startBtn);
+    container.appendChild(gameDiv);
+}
+
+
 // ==================== PREVIEW ANIMATIONS ====================
 function initPreviews() {
     const snakeCanvas = document.getElementById('snake-preview');
@@ -1404,6 +2332,153 @@ function initPreviews() {
             cell.textContent = val || '';
             preview2048.appendChild(cell);
         });
+    }
+    
+    // Minesweeper Preview
+    const minesweeperPreview = document.getElementById('minesweeper-preview');
+    if (minesweeperPreview) {
+        const cells = ['1', '2', '💣', '', '1', '', '💣', '3', '2', '1', '', '', '1', '💣', '', '💣', '', '2', '1', '', '', '1', '2', '💣', '1'];
+        cells.forEach(val => {
+            const cell = document.createElement('div');
+            cell.className = 'mine-cell';
+            cell.textContent = val;
+            cell.style.fontSize = val === '💣' ? '1rem' : '0.8rem';
+            cell.style.fontWeight = 'bold';
+            cell.style.color = val === '1' ? '#0000ff' : val === '2' ? '#008000' : val === '3' ? '#ff0000' : '#000';
+            minesweeperPreview.appendChild(cell);
+        });
+    }
+    
+    // Tic-Tac-Toe Preview
+    const tictactoePreview = document.getElementById('tictactoe-preview');
+    if (tictactoePreview) {
+        const cells = ['X', 'O', 'X', '', 'X', 'O', 'O', '', 'X'];
+        cells.forEach(val => {
+            const cell = document.createElement('div');
+            cell.className = 'ttt-cell';
+            cell.textContent = val;
+            cell.style.color = val === 'X' ? '#00ff88' : '#ff00ff';
+            tictactoePreview.appendChild(cell);
+        });
+    }
+    
+    // Connect Four Preview
+    const connectfourPreview = document.getElementById('connectfour-preview');
+    if (connectfourPreview) {
+        const pattern = [
+            0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 2, 0, 0, 0,
+            0, 0, 1, 1, 0, 0, 0,
+            0, 2, 2, 1, 2, 0, 0,
+            1, 1, 2, 1, 2, 1, 0
+        ];
+        pattern.forEach(val => {
+            const cell = document.createElement('div');
+            cell.className = 'c4-cell' + (val === 1 ? ' red' : val === 2 ? ' yellow' : '');
+            connectfourPreview.appendChild(cell);
+        });
+    }
+    
+    // Simon Says Preview
+    const simonsaysPreview = document.getElementById('simonsays-preview');
+    if (simonsaysPreview) {
+        const colors = ['#ff0055', '#00ff88', '#0066ff', '#ffcc00'];
+        colors.forEach(color => {
+            const btn = document.createElement('div');
+            btn.className = 'simon-btn';
+            btn.style.background = color;
+            simonsaysPreview.appendChild(btn);
+        });
+    }
+    
+    // Whack-a-Mole Preview
+    const whackamoleCanvas = document.getElementById('whackamole-preview');
+    if (whackamoleCanvas) {
+        const ctx = whackamoleCanvas.getContext('2d');
+        let moleY = 0;
+        let direction = 1;
+        function animateWhackamole() {
+            ctx.fillStyle = '#1a1a2e';
+            ctx.fillRect(0, 0, 300, 200);
+            
+            // Draw holes
+            for (let i = 0; i < 3; i++) {
+                const x = 50 + i * 100;
+                const y = 120;
+                
+                // Hole shadow
+                ctx.fillStyle = '#4a3c2a';
+                ctx.beginPath();
+                ctx.ellipse(x, y + 30, 35, 15, 0, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Mole (only in center)
+                if (i === 1) {
+                    ctx.fillStyle = '#8B4513';
+                    ctx.beginPath();
+                    ctx.arc(x, y - 10 + moleY, 25, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Eyes
+                    ctx.fillStyle = '#000';
+                    ctx.beginPath();
+                    ctx.arc(x - 8, y - 15 + moleY, 4, 0, Math.PI * 2);
+                    ctx.arc(x + 8, y - 15 + moleY, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Nose
+                    ctx.fillStyle = '#FF69B4';
+                    ctx.beginPath();
+                    ctx.arc(x, y - 5 + moleY, 6, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+            
+            moleY += direction * 0.5;
+            if (moleY > 10 || moleY < -20) direction *= -1;
+            
+            requestAnimationFrame(animateWhackamole);
+        }
+        animateWhackamole();
+    }
+    
+    // Dino Runner Preview
+    const dinorunnerCanvas = document.getElementById('dinorunner-preview');
+    if (dinorunnerCanvas) {
+        const ctx = dinorunnerCanvas.getContext('2d');
+        let dinoY = 0;
+        let dinoVY = 0;
+        let obstacleX = 300;
+        function animateDinoRunner() {
+            ctx.fillStyle = '#f7f7f7';
+            ctx.fillRect(0, 0, 300, 200);
+            
+            // Ground
+            ctx.fillStyle = '#535353';
+            ctx.fillRect(0, 160, 300, 2);
+            
+            // Dino
+            dinoVY += 0.5;
+            dinoY += dinoVY;
+            if (dinoY > 0) {
+                dinoY = 0;
+                dinoVY = -8;
+            }
+            
+            ctx.fillStyle = '#535353';
+            ctx.fillRect(50, 120 + dinoY, 30, 40);
+            ctx.fillRect(70, 110 + dinoY, 15, 20);
+            
+            // Obstacle
+            obstacleX -= 3;
+            if (obstacleX < -30) obstacleX = 300;
+            
+            ctx.fillRect(obstacleX, 130, 20, 30);
+            
+            requestAnimationFrame(animateDinoRunner);
+        }
+        animateDinoRunner();
     }
 }
 

@@ -392,6 +392,84 @@ body {
     font-size: 0.9rem;
 }
 
+/* Minesweeper Preview */
+.minesweeper-preview {
+    display: grid;
+    grid-template-columns: repeat(5, 35px);
+    gap: 3px;
+}
+
+.minesweeper-preview .mine-cell {
+    width: 35px;
+    height: 35px;
+    background: var(--primary-color);
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+}
+
+/* Tic-Tac-Toe Preview */
+.tictactoe-preview {
+    display: grid;
+    grid-template-columns: repeat(3, 50px);
+    gap: 5px;
+}
+
+.tictactoe-preview .ttt-cell {
+    width: 50px;
+    height: 50px;
+    background: var(--bg-card);
+    border: 2px solid var(--primary-color);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+/* Connect Four Preview */
+.connectfour-preview {
+    display: grid;
+    grid-template-columns: repeat(7, 22px);
+    gap: 3px;
+    padding: 8px;
+    background: #0066ff;
+    border-radius: 8px;
+}
+
+.connectfour-preview .c4-cell {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--bg-card);
+}
+
+.connectfour-preview .c4-cell.red {
+    background: #ff0055;
+}
+
+.connectfour-preview .c4-cell.yellow {
+    background: #ffcc00;
+}
+
+/* Simon Says Preview */
+.simonsays-preview {
+    display: grid;
+    grid-template-columns: repeat(2, 70px);
+    gap: 8px;
+}
+
+.simonsays-preview .simon-btn {
+    width: 70px;
+    height: 70px;
+    border-radius: 10px;
+    opacity: 0.7;
+}
+
 /* Footer */
 footer {
     background: rgba(0, 0, 0, 0.5);
