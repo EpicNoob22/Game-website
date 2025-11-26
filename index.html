@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Ultimate Gaming Hub - Play free online games">
+    <title>Ultimate Gaming Hub</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="logo">
+                <span class="logo-icon">🎮</span>
+                <span class="logo-text">Ultimate Gaming Hub</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#featured" class="nav-link">Featured</a></li>
+                <li><a href="#arcade" class="nav-link">Arcade</a></li>
+                <li><a href="#puzzle" class="nav-link">Puzzle</a></li>
+                <li><a href="#action" class="nav-link">Action</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Welcome to the <span class="highlight">Ultimate Gaming Hub</span></h1>
+                <p>Play amazing free games directly in your browser!</p>
+                <a href="#featured" class="cta-button">Start Playing</a>
+            </div>
+            <div class="hero-particles" id="particles"></div>
+        </section>
+
+        <section id="featured" class="games-section">
+            <h2 class="section-title">🌟 Featured Games</h2>
+            <div class="games-grid">
+                <div class="game-card" data-game="snake">
+                    <div class="game-preview">
+                        <canvas id="snake-preview" width="300" height="200"></canvas>
+                    </div>
+                    <div class="game-info">
+                        <h3>Snake</h3>
+                        <p>Classic snake game - eat food, grow longer!</p>
+                        <button class="play-btn" onclick="openGame('snake')">Play Now</button>
+                    </div>
+                </div>
+
+                <div class="game-card" data-game="pong">
+                    <div class="game-preview">
+                        <canvas id="pong-preview" width="300" height="200"></canvas>
+                    </div>
+                    <div class="game-info">
+                        <h3>Pong</h3>
+                        <p>Classic arcade pong against AI</p>
+                        <button class="play-btn" onclick="openGame('pong')">Play Now</button>
+                    </div>
+                </div>
+
+                <div class="game-card" data-game="breakout">
+                    <div class="game-preview">
+                        <canvas id="breakout-preview" width="300" height="200"></canvas>
+                    </div>
+                    <div class="game-info">
+                        <h3>Breakout</h3>
+                        <p>Break all the bricks!</p>
+                        <button class="play-btn" onclick="openGame('breakout')">Play Now</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="arcade" class="games-section">
+            <h2 class="section-title">🕹️ Arcade Games</h2>
+            <div class="games-grid">
+                <div class="game-card" data-game="flappy">
+                    <div class="game-preview">
+                        <canvas id="flappy-preview" width="300" height="200"></canvas>
+                    </div>
+                    <div class="game-info">
+                        <h3>Flappy Bird</h3>
+                        <p>Navigate through pipes!</p>
+                        <button class="play-btn" onclick="openGame('flappy')">Play Now</button>
+                    </div>
+                </div>
+
+                <div class="game-card" data-game="spaceinvaders">
+                    <div class="game-preview">
+                        <canvas id="spaceinvaders-preview" width="300" height="200"></canvas>
+                    </div>
+                    <div class="game-info">
+                        <h3>Space Invaders</h3>
+                        <p>Defend Earth from aliens!</p>
+                        <button class="play-btn" onclick="openGame('spaceinvaders')">Play Now</button>
+                    </div>
+                </div>
+
+                <div class="game-card" data-game="asteroids">
+                    <div class="game-preview">
+                        <canvas id="asteroids-preview" width="300" height="200"></canvas>
+                    </div>
+                    <div class="game-info">
+                        <h3>Asteroids</h3>
+                        <p>Destroy asteroids in space!</p>
+                        <button class="play-btn" onclick="openGame('asteroids')">Play Now</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="puzzle" class="games-section">
+            <h2 class="section-title">🧩 Puzzle Games</h2>
+            <div class="games-grid">
+                <div class="game-card" data-game="tetris">
+                    <div class="game-preview">
+                        <canvas id="tetris-preview" width="300" height="200"></canvas>
+                    </div>
+                    <div class="game-info">
+                        <h3>Tetris</h3>
+                        <p>Classic block-stacking puzzle!</p>
+                        <button class="play-btn" onclick="openGame('tetris')">Play Now</button>
+                    </div>
+                </div>
+
+                <div class="game-card" data-game="memory">
+                    <div class="game-preview">
+                        <div id="memory-preview" class="memory-grid-preview"></div>
+                    </div>
+                    <div class="game-info">
+                        <h3>Memory Match</h3>
+                        <p>Find matching pairs!</p>
+                        <button class="play-btn" onclick="openGame('memory')">Play Now</button>
+                    </div>
+                </div>
+
+                <div class="game-card" data-game="2048">
+                    <div class="game-preview">
+                        <div id="2048-preview" class="preview-2048"></div>
+                    </div>
+                    <div class="game-info">
+                        <h3>2048</h3>
+                        <p>Combine tiles to reach 2048!</p>
+                        <button class="play-btn" onclick="openGame('2048')">Play Now</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="action" class="games-section">
+            <h2 class="section-title">⚔️ Action Games</h2>
+            <div class="games-grid">
+                <div class="game-card" data-game="runner">
+                    <div class="game-preview">
+                        <canvas id="runner-preview" width="300" height="200"></canvas>
+                    </div>
+                    <div class="game-info">
+                        <h3>Endless Runner</h3>
+                        <p>Run and jump to survive!</p>
+                        <button class="play-btn" onclick="openGame('runner')">Play Now</button>
+                    </div>
+                </div>
+
+                <div class="game-card" data-game="shooter">
+                    <div class="game-preview">
+                        <canvas id="shooter-preview" width="300" height="200"></canvas>
+                    </div>
+                    <div class="game-info">
+                        <h3>Target Shooter</h3>
+                        <p>Test your aim!</p>
+                        <button class="play-btn" onclick="openGame('shooter')">Play Now</button>
+                    </div>
+                </div>
+
+                <div class="game-card" data-game="platformer">
+                    <div class="game-preview">
+                        <canvas id="platformer-preview" width="300" height="200"></canvas>
+                    </div>
+                    <div class="game-info">
+                        <h3>Platformer</h3>
+                        <p>Jump and collect coins!</p>
+                        <button class="play-btn" onclick="openGame('platformer')">Play Now</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Game Modal -->
+    <div id="game-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Game</h2>
+                <button class="close-btn" onclick="closeGame()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <canvas id="game-canvas" width="800" height="600"></canvas>
+                <div id="game-container"></div>
+            </div>
+            <div class="modal-footer">
+                <p id="game-instructions">Use arrow keys or WASD to play</p>
+                <p id="game-score">Score: 0</p>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2024 Ultimate Gaming Hub. All games are free to play!</p>
+            <div class="social-links">
+                <span>🎮</span>
+                <span>🎯</span>
+                <span>🏆</span>
+            </div>
+        </div>
+    </footer>
+
+    <script src="games.js" defer></script>
+</body>
+</html>
