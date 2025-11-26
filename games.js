@@ -924,6 +924,7 @@ function startMemory(canvas, container) {
         card.textContent = '?';
         
         card.addEventListener('click', () => {
+            if (!canFlip || flipped.includes(index) || matched.includes(index)) return;
             
             card.textContent = emoji;
             card.style.background = '#252545';
@@ -974,6 +975,7 @@ function start2048(canvas, container) {
         const empty = [];
         for (let r = 0; r < 4; r++) {
             for (let c = 0; c < 4; c++) {
+                if (!grid[r][c]) empty.push({r, c});
             }
         }
         if (empty.length) {
