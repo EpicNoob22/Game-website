@@ -1,6 +1,6 @@
 # Ultimate Gaming Hub 🎮
 
-A high-performance gaming website with 12 playable browser games!
+A high-performance gaming website with 18 playable browser games!
 
 ## 🌐 Play Now
 
@@ -8,7 +8,7 @@ A high-performance gaming website with 12 playable browser games!
 
 ## Features
 
-- **12 Different Games**: Snake, Pong, Breakout, Flappy Bird, Space Invaders, Asteroids, Tetris, Memory Match, 2048, Endless Runner, Target Shooter, and Platformer
+- **18 Different Games**: Snake, Pong, Breakout, Flappy Bird, Space Invaders, Asteroids, Tetris, Memory Match, 2048, Endless Runner, Target Shooter, Platformer, Minesweeper, Tic-Tac-Toe, Connect Four, Whack-a-Mole, Dino Runner, and Simon Says
 - **Ultra Performance**: Built with vanilla JavaScript and HTML5 Canvas for maximum performance
 - **Responsive Design**: Works on desktop and mobile devices
 - **Modern UI**: Cyberpunk-inspired design with animated particles and gradients
@@ -30,11 +30,17 @@ A high-performance gaming website with 12 playable browser games!
 - 🧊 **Tetris** - Classic block-stacking puzzle
 - 🎴 **Memory Match** - Find matching pairs
 - 🔢 **2048** - Combine tiles to reach 2048
+- 💣 **Minesweeper** - Find the mines without exploding
+- ❌ **Tic-Tac-Toe** - Classic X and O strategy game
+- 🔴 **Connect Four** - Connect 4 discs to win
+- 🎵 **Simon Says** - Memory pattern game
 
 ### Action Games
 - 🏃 **Endless Runner** - Run and jump to survive
 - 🎯 **Target Shooter** - Test your aim
 - 🏔️ **Platformer** - Jump and collect coins
+- 🔨 **Whack-a-Mole** - Whack moles before they hide
+- 🦖 **Dino Runner** - Chrome-style dinosaur game
 
 ## How to Play
 
